@@ -14,21 +14,18 @@ const LoginPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) {
-      alert("Please fill all fields");
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!formData.email || !formData.password) return alert("Please fill all fields");
 
-    try {
-      await login(formData); // ✅ call Zustand login
-      navigate("/"); // redirect after successful login
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Login failed");
-    }
-  };
+  try {
+    const user = await login(formData); // get user
+    if (user) navigate("/"); // redirect only if login successful
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

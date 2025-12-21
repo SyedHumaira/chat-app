@@ -36,20 +36,21 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  login: async (data) => {
-    set({ isLoggingIn: true });
-    try {
-      const res = await axiosInstance.post("/auth/login", data);
-      // backend sets cookie automatically, just save user
-      set({ authUser: res.data });
-      toast.success("Logged in successfully");
-    } catch (error) {
-      console.error("Login error:", error.response || error);
-      toast.error(error.response?.data?.message || "Login failed");
-    } finally {
-      set({ isLoggingIn: false });
-    }
-  },
+login: async (data) => {
+  set({ isLoggingIn: true });
+  try {
+    const res = await axiosInstance.post("/auth/login", data);
+    set({ authUser: res.data.user }); // 🔑 make sure backend returns { user: { ... } }
+    toast.success("Logged in successfully");
+    return res.data.user; // 🔑 return user for the frontend
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Login failed");
+    throw error; // 🔑 allow try/catch in LoginPage
+  } finally {
+    set({ isLoggingIn: false });
+  }
+},
+
 
   logout: async () => {
     try {
