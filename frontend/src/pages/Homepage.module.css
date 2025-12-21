@@ -1,0 +1,5 @@
+.container {
+  display: flex;           /* horizontal layout */
+  height: 100vh;           /* full viewport height */
+  background-color: #120C1C;
+}

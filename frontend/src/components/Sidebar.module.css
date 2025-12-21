@@ -1,0 +1,84 @@
+.sidebar {
+  width: 280px;
+  background-color: #1A1226;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #C9A24D33;
+}
+
+.title {
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #FFFFFF;
+  border-bottom: 1px solid #C9A24D33;
+}
+
+.userList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.userItem:hover {
+  background-color: rgba(42, 31, 61, 0.5);
+}
+
+.active {
+  background-color: #2A1F3D;
+}
+
+.avatarWrapper {
+  position: relative;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.onlineDot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #00FF00;
+  border: 1px solid #1A1226;
+  border-radius: 50%;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #FFFFFF;
+}
+
+.lastMessage {
+  font-size: 11px;
+  color: #7C7196;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
