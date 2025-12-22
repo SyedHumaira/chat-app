@@ -12,8 +12,13 @@ const protectRoute = async (req, res, next) => {
         .json({ message: "Unauthorized – No token provided" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({ message: "Token expired" });
+      }
       return res.status(401).json({ message: "Unauthorized – Invalid token" });
     }
 
@@ -29,5 +34,6 @@ const protectRoute = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 export default protectRoute;
 // end of backend/src/middleware/auth.middleware.js
