@@ -1,4 +1,4 @@
-// backend/src/lib/axios.js
+// frontent/src/lib/axios.js
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -7,4 +7,4 @@ const axiosInstance = axios.create({
 });
 
 export default axiosInstance;
-// end of backend/src/lib/axios.js
+// end of frontend/src/lib/axios.js

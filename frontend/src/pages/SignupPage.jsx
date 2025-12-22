@@ -19,10 +19,11 @@ const SignupPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    await signup(formData);
-    navigate("/");
-  };
+  e.preventDefault();
+  const success = await signup(formData);
+  if (success) navigate("/");
+};
+
 
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">

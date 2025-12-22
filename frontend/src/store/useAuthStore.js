@@ -14,38 +14,44 @@ export const useAuthStore = create((set) => ({
   setCheckingAuth: (val) => set({ isCheckingAuth: val }),
 
   checkAuth: async () => {
-    try {
-      const res = await axiosInstance.get("/auth/check");
-      set({ authUser: res.data, isCheckingAuth: false });
-    } catch (error) {
-      set({ authUser: null, isCheckingAuth: false });
-      console.error("Auth check error:", error.response || error);
-    }
-  },
+  try {
+    const res = await axiosInstance.get("/auth/check");
+    set({ authUser: res.data, isCheckingAuth: false });
+  } catch (error) {
+    set((state) => ({
+      authUser: state.authUser, // 🔑 DON'T wipe existing user
+      isCheckingAuth: false,
+    }));
+  }
+},
 
-  signup: async (data) => {
-    set({ isSigningUp: true });
-    try {
-      const res = await axiosInstance.post("/auth/signup", data);
-      set({ authUser: res.data });
-      toast.success("Account created successfully");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Signup failed");
-    } finally {
-      set({ isSigningUp: false });
-    }
-  },
+
+ signup: async (data) => {
+  set({ isSigningUp: true });
+  try {
+    const res = await axiosInstance.post("/auth/signup", data);
+    set({ authUser: res.data.user || res.data });
+    toast.success("Account created successfully");
+    return true; // ✅ SUCCESS
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Signup failed");
+    return false; // ❌ FAIL
+  } finally {
+    set({ isSigningUp: false });
+  }
+},
+
 
 login: async (data) => {
   set({ isLoggingIn: true });
   try {
     const res = await axiosInstance.post("/auth/login", data);
-    set({ authUser: res.data.user }); // 🔑 make sure backend returns { user: { ... } }
+    set({ authUser: res.data.user });
     toast.success("Logged in successfully");
-    return res.data.user; // 🔑 return user for the frontend
+    return true;
   } catch (error) {
     toast.error(error.response?.data?.message || "Login failed");
-    throw error; // 🔑 allow try/catch in LoginPage
+    return false;
   } finally {
     set({ isLoggingIn: false });
   }

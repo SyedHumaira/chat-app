@@ -16,16 +16,9 @@ const LoginPage = () => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-  if (!formData.email || !formData.password) return alert("Please fill all fields");
-
-  try {
-    const user = await login(formData); // get user
-    if (user) navigate("/"); // redirect only if login successful
-  } catch (err) {
-    console.error(err);
-  }
+  const success = await login(formData);
+  if (success) navigate("/");
 };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
