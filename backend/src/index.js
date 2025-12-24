@@ -10,12 +10,13 @@ import http from "http";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { initSocket } from "./socket/socket.js";
+import "./config/env.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-
+  
 // --- Security Middleware ---
 app.use(helmet());
 
@@ -33,7 +34,7 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
 });
-app.use(limiter);
+app.use("/api", limiter);
 
 // --- Body Parser & Cookies ---
 app.use(express.json({ limit: "10mb" })); // increase if you send images/base64

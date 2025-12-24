@@ -3,7 +3,8 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 
 let io;
-// TODO: In production, replace this Map with Redis or another persistent store
+
+// In production, replace Map with Redis
 const onlineUsers = new Map();
 
 // --- Initialize Socket.IO ---
@@ -16,36 +17,49 @@ export const initSocket = (httpServer) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("CONNECTED:", socket.id);
-
-    // --- Setup with JWT authentication ---
-    socket.on("setup", (token) => {
-      if (!token) return;
-
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.id;
-        onlineUsers.set(userId.toString(), socket.id);
-
-        // Emit updated online users list
-        io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-      } catch (err) {
-        console.warn("Socket setup failed:", err.message);
-        socket.emit("unauthorized", { message: "Invalid token" });
+    try {
+      // --- Read JWT from cookies ---
+      const cookies = socket.handshake.headers.cookie;
+      if (!cookies) {
+        console.warn("Socket connection rejected: No cookies");
+        socket.disconnect();
+        return;
       }
-    });
 
-    // --- Handle disconnect ---
-    socket.on("disconnect", () => {
-      for (const [userId, socketId] of onlineUsers.entries()) {
-        if (socketId === socket.id) {
-          onlineUsers.delete(userId);
-          break;
-        }
+      const token = cookies
+        .split("; ")
+        .find((c) => c.startsWith("JWT="))
+        ?.split("=")[1];
+
+      if (!token) {
+        console.warn("Socket connection rejected: No JWT cookie");
+        socket.disconnect();
+        return;
       }
+
+      // --- Verify JWT ---
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.id.toString();
+
+      // --- Store online user ---
+      onlineUsers.set(userId, socket.id);
+
+      console.log("SOCKET CONNECTED:", socket.id, "USER:", userId);
+
+      // --- Broadcast online users ---
       io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-      console.log("DISCONNECTED:", socket.id);
-    });
+
+      // --- Handle disconnect ---
+      socket.on("disconnect", () => {
+        onlineUsers.delete(userId);
+
+        io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+        console.log("SOCKET DISCONNECTED:", socket.id, "USER:", userId);
+      });
+    } catch (err) {
+      console.error("Socket auth failed:", err.message);
+      socket.disconnect();
+    }
   });
 };
 

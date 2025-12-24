@@ -1,8 +1,9 @@
+// frontend/src/store/useChatStore.js
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import socket from "../lib/socket";
 
-// 🔐 StrictMode-safe flag (module scoped)
+// 🔐 StrictMode-safe flag
 let isSocketInitialized = false;
 
 export const useChatStore = create((set, get) => ({
@@ -10,19 +11,17 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   messages: [],
   onlineUsers: [],
-  isSending: false, 
+  isSending: false,
 
-  // ✅ CONNECT SOCKET (ONLY ONCE)
-  connectSocket: (userId) => {
-    if (!userId) return;
+  // ✅ CONNECT SOCKET (COOKIE-BASED AUTH)
+  connectSocket: () => {
     if (isSocketInitialized) return;
 
     isSocketInitialized = true;
 
-    socket.connect();
-    socket.emit("setup", userId);
+    socket.connect(); // JWT read from HttpOnly cookie by backend
 
-    // 🧹 clean listeners before attaching
+    // 🧹 clean listeners
     socket.off("onlineUsers");
     socket.off("receiveMessage");
 
@@ -45,24 +44,19 @@ export const useChatStore = create((set, get) => ({
     });
   },
 
-  // ✅ DISCONNECT SOCKET (StrictMode safe)
- disconnectSocket: () => {
-  if (!isSocketInitialized) return;
+  // ✅ DISCONNECT SOCKET (STRICTMODE SAFE)
+  disconnectSocket: () => {
+    if (!isSocketInitialized) return;
 
-  isSocketInitialized = false;
+    isSocketInitialized = false;
 
-  // remove all listeners first
-  socket.removeAllListeners();
-  
-  // disconnect socket
-  socket.disconnect();
-  
-  // optional: reset chat state
-  set({ messages: [], selectedUser: null, onlineUsers: [] });
-},
+    socket.removeAllListeners();
+    socket.disconnect();
 
+    set({ messages: [], selectedUser: null, onlineUsers: [] });
+  },
 
- fetchUsers: async () => {
+  fetchUsers: async () => {
     const res = await axiosInstance.get("/messages/users");
     set({ users: res.data });
   },
@@ -76,7 +70,7 @@ export const useChatStore = create((set, get) => ({
 
   sendMessage: async (text) => {
     const { selectedUser, isSending } = get();
-    if (!selectedUser || !text || isSending) return; // 🔹 prevent double send
+    if (!selectedUser || !text || isSending) return;
 
     set({ isSending: true });
 
@@ -92,7 +86,8 @@ export const useChatStore = create((set, get) => ({
     } catch (err) {
       console.error("Failed to send message:", err);
     } finally {
-      set({ isSending: false }); // 🔹 reset flag
+      set({ isSending: false });
     }
   },
 }));
+// end of frontend/src/store/useChatStore.js

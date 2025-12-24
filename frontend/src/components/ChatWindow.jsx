@@ -1,10 +1,11 @@
+// frontend/src/components/ChatWindow.jsx
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState, useRef, useEffect } from "react";
 import styles from "./ChatWindow.module.css";
 
 const ChatWindow = () => {
-  const { selectedUser, messages, sendMessage } = useChatStore();
+  const { selectedUser, messages, sendMessage, onlineUsers } = useChatStore();
   const { authUser } = useAuthStore();
   const [text, setText] = useState("");
   const messagesEndRef = useRef(null);
@@ -24,6 +25,9 @@ const ChatWindow = () => {
     setText("");
   };
 
+  // ✅ Determine online status from store
+  const isOnline = onlineUsers.includes(selectedUser._id);
+
   return (
     <div className={styles.chatWindow}>
       {/* Header */}
@@ -36,7 +40,7 @@ const ChatWindow = () => {
         <div>
           <div className={styles.userName}>{selectedUser.fullName}</div>
           <div className={styles.status}>
-            {selectedUser.isOnline ? "Online" : "Offline"}
+            {isOnline ? "Online" : "Offline"}
           </div>
         </div>
       </div>
@@ -44,7 +48,10 @@ const ChatWindow = () => {
       {/* Messages */}
       <div className={styles.messages}>
         {messages.map((msg) => {
-          const isMine = msg.senderId === authUser._id;
+          // ✅ Correctly handle senderId mismatch
+          const isMine =
+            msg.senderId?._id === authUser._id || msg.senderId === authUser._id;
+
           return (
             <div
               key={msg._id}
@@ -57,7 +64,10 @@ const ChatWindow = () => {
               </div>
               <div className={styles.messageMeta}>
                 <span className={styles.timestamp}>
-                  {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </span>
                 {isMine && (
                   <span className={styles.seenIcon}>
@@ -79,10 +89,13 @@ const ChatWindow = () => {
           placeholder="Type a message..."
           className={styles.inputBox}
         />
-        <button type="submit" className={styles.sendButton}>Send</button>
+        <button type="submit" className={styles.sendButton}>
+          Send
+        </button>
       </form>
     </div>
   );
 };
 
 export default ChatWindow;
+// end of frontend/src/components/ChatWindow.jsx

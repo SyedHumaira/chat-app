@@ -68,12 +68,14 @@ export const login = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (req, res) => {
   res.cookie("JWT", "", {
     httpOnly: true,
-    expires: new Date(0),
-    sameSite: process.env.NODE_ENV === "production" ? "lax" : "strict",
-    secure: process.env.NODE_ENV === "production",
+    secure: true,      
+    sameSite: "none",   
+    maxAge: 0,
   });
+
   res.status(200).json({ message: "Logged out successfully" });
 });
+
 
 // --- UPDATE PROFILE ---
 export const updateProfile = asyncHandler(async (req, res) => {

@@ -2,6 +2,10 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET not defined");
+}
+
 const protectRoute = async (req, res, next) => {
   try {
     const token = req.cookies.JWT;

@@ -11,7 +11,7 @@ const Homepage = () => {
 
   useEffect(() => {
     if (!authUser?._id) return;
-    connectSocket(authUser._id);
+    connectSocket();
     fetchUsers();
 
     return () => disconnectSocket();

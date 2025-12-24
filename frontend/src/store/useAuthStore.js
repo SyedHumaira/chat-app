@@ -30,7 +30,7 @@ export const useAuthStore = create((set) => ({
   set({ isSigningUp: true });
   try {
     const res = await axiosInstance.post("/auth/signup", data);
-    set({ authUser: res.data.user || res.data });
+    set({ authUser: res.data });
     toast.success("Account created successfully");
     return true; // ✅ SUCCESS
   } catch (error) {
@@ -46,7 +46,7 @@ login: async (data) => {
   set({ isLoggingIn: true });
   try {
     const res = await axiosInstance.post("/auth/login", data);
-    set({ authUser: res.data.user });
+    set({ authUser: res.data });// Backend Match
     toast.success("Logged in successfully");
     return true;
   } catch (error) {
